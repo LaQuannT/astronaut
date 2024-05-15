@@ -35,11 +35,35 @@ type (
 		BirthPlace string `json:"birthPlace"`
 	}
 
+	User struct {
+		ID        int    `json:"id"`
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		Email     string `json:"email"`
+		Password  string `json:"password,omitempty"`
+		APIKey    string `json:"apiKey,omitempty"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+
 	// add method for searching by name
 	AstronautRepository interface {
 		CreateAstronaut(ctx context.Context, a Astronaut) error
 		FindAstronautByID(ctx context.Context, id int) (*Astronaut, error)
 		UpdateAstronaut(ctx context.Context, a *Astronaut) error
 		DeleteAstronaut(ctx context.Context, id int) error
+	}
+
+	UserRepository interface {
+		CreateUser(ctx context.Context, u User) error
+		FindUserByID(ctx context.Context, id int) (*User, error)
+		FindUserByEmail(ctx context.Context, email string) (*User, error)
+		FindAllUsers(ctx context.Context) ([]*User, error)
+		UpdateUser(ctx context.Context, u *User) error
+		DeleteUser(ctx context.Context, id int) error
+		RestUserPassword(ctx context.Context, hash string, id int) error
+		GenerateNewUserAPIKey(ctx context.Context, id int) (string, error)
+		GiveAdminPrivileges(ctx context.Context, id int) error
+		RevokeAdminPrivileges(ctx context.Context, id int) error
 	}
 )
