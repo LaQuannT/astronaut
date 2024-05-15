@@ -1,0 +1,1 @@
+DROP TABLE astronaut_grad_major;
