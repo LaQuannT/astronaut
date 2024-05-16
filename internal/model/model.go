@@ -54,6 +54,13 @@ type (
 		Successful    bool   `json:"successful"`
 	}
 
+	MilitaryLog struct {
+		AstronautID int
+		Branch      string
+		Rank        string
+		Retired     bool
+	}
+
 	// add method for searching by name
 	AstronautRepository interface {
 		CreateAstronaut(ctx context.Context, a Astronaut) error
@@ -85,5 +92,13 @@ type (
 		FindMissionsByAstronaut(ctx context.Context, astronautID int) ([]*Mission, error)
 		DeleteAstronautMission(ctx context.Context, astronautID, missionID int) error
 		DeleteMission(ctx context.Context, missionID int) error
+	}
+
+	MilitaryLogRepository interface {
+		CreateMilitaryLog(ctx context.Context, m *MilitaryLog) error
+		FindMilitaryLog(ctx context.Context, astronautID int) (*MilitaryLog, error)
+		FindAllMilitaryLogs(ctx context.Context) ([]*MilitaryLog, error)
+		UpdateMilitaryLog(ctx context.Context, m *MilitaryLog) error
+		DeleteMilitaryLog(ctx context.Context, astronautID int) error
 	}
 )
