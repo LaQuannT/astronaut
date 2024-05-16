@@ -61,6 +61,23 @@ type (
 		Retired     bool
 	}
 
+	Major struct {
+		ID     int
+		Course string
+	}
+
+	AlmaMater struct {
+		ID     int
+		School string
+	}
+
+	AcademicLog struct {
+		AstronautID     int
+		AlmaMaters      []*AlmaMater
+		UnderGradMajors []*Major
+		GradMajors      []*Major
+	}
+
 	// add method for searching by name
 	AstronautRepository interface {
 		CreateAstronaut(ctx context.Context, a Astronaut) error
@@ -100,5 +117,25 @@ type (
 		FindAllMilitaryLogs(ctx context.Context) ([]*MilitaryLog, error)
 		UpdateMilitaryLog(ctx context.Context, m *MilitaryLog) error
 		DeleteMilitaryLog(ctx context.Context, astronautID int) error
+	}
+
+	AcademicLogRepository interface {
+		CreateMajor(ctx context.Context, m *Major) error
+		CreateAlmaMater(ctx context.Context, a *AlmaMater) error
+		AddUnderGradMajor(ctx context.Context, astronautID, majorID int) error
+		AddGradMajor(ctx context.Context, astronautID, majorID int) error
+		AddAstronautAlmaMater(ctx context.Context, astronautID, almaMaterID int) error
+		UpdateMajor(ctx context.Context, m *Major) error
+		UpdateAlmaMater(ctx context.Context, a *AlmaMater) error
+		FindMajorByID(ctx context.Context, id int) (*Major, error)
+		FindAlmaMaterByID(ctx context.Context, id int) (*AlmaMater, error)
+		FindAstronautUnderGradMajors(ctx context.Context, astronautID int) ([]*Major, error)
+		FindAstronautGradMajors(ctx context.Context, astronautID int) ([]*Major, error)
+		FindAstronautAlmaMaters(ctx context.Context, astronautID int) ([]*AlmaMater, error)
+		DeleteMajor(ctx context.Context, id int) error
+		DeleteAstronautUnderGradMajor(ctx context.Context, astronautID, majorID int) error
+		DeleteAstronautGradMajor(ctx context.Context, astronautID, majorID int) error
+		DeleteAlmaMater(ctx context.Context, id int) error
+		DeleteAstronautAlmaMater(ctx context.Context, astronautID, majorID int) error
 	}
 )
