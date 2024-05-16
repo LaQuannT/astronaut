@@ -2,6 +2,15 @@ package model
 
 import "context"
 
+type status string
+
+const (
+	Active     status = "active"
+	Retired    status = "retired"
+	Management status = "management"
+	Deceased   status = "deceased"
+)
+
 // array (seperated by) -- missions (,), gradute major, undergrad, almamater (;)
 type (
 	AstronautData struct {
@@ -78,6 +87,17 @@ type (
 		GradMajors      []*Major
 	}
 
+	AstronautLog struct {
+		AstronautID      int
+		SpaceFlights     int
+		SpaceFlightHours int
+		SpaceWalks       int
+		SpaceWalkHours   int
+		Status           status
+		DeathMissionID   int
+		DeathDate        string
+	}
+
 	// add method for searching by name
 	AstronautRepository interface {
 		CreateAstronaut(ctx context.Context, a Astronaut) error
@@ -137,5 +157,13 @@ type (
 		DeleteAstronautGradMajor(ctx context.Context, astronautID, majorID int) error
 		DeleteAlmaMater(ctx context.Context, id int) error
 		DeleteAstronautAlmaMater(ctx context.Context, astronautID, majorID int) error
+	}
+
+	AstronautLogRepository interface {
+		CreateAstronautLog(ctx context.Context, a *AstronautLog) error
+		FindAstronautLogById(ctx context.Context, astronautID int) (*AstronautLog, error)
+		FindAstronautLogs(ctx context.Context) ([]*AstronautLog, error)
+		UpdateAstronautLog(ctx context.Context, a *AstronautLog) error
+		DeleteAstronautLog(ctx context.Context, astronautID int) error
 	}
 )
