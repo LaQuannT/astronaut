@@ -46,6 +46,14 @@ type (
 		UpdatedAt string `json:"updatedAt"`
 	}
 
+	Mission struct {
+		ID            int    `json:"id"`
+		Name          string `json:"name"`
+		Alias         string `json:"alias"`
+		DateOfMission string `json:"dateOfMission"`
+		Successful    bool   `json:"successful"`
+	}
+
 	// add method for searching by name
 	AstronautRepository interface {
 		CreateAstronaut(ctx context.Context, a Astronaut) error
@@ -65,5 +73,17 @@ type (
 		GenerateNewUserAPIKey(ctx context.Context, id int) (string, error)
 		GiveAdminPrivileges(ctx context.Context, id int) error
 		RevokeAdminPrivileges(ctx context.Context, id int) error
+	}
+
+	MissionRepository interface {
+		CreateMission(ctx context.Context, m Mission) error
+		FindMissionByID(ctx context.Context, id int) (*Mission, error)
+		FindMissionByNameOrAlias(ctx context.Context, target string) ([]*Mission, error)
+		FindAllMissions(ctx context.Context) ([]*Mission, error)
+		UpdateMission(ctx context.Context, m *Mission) error
+		CreateAstronautMission(ctx context.Context, missionID, astronautID int) error
+		FindMissionsByAstronaut(ctx context.Context, astronautID int) ([]*Mission, error)
+		DeleteAstronautMission(ctx context.Context, astronautID, missionID int) error
+		DeleteMission(ctx context.Context, missionID int) error
 	}
 )
