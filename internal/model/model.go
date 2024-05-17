@@ -98,16 +98,17 @@ type (
 		DeathDate        string
 	}
 
-	// add method for searching by name
 	AstronautRepository interface {
-		CreateAstronaut(ctx context.Context, a Astronaut) error
+		CreateAstronaut(ctx context.Context, a *Astronaut) error
 		FindAstronautByID(ctx context.Context, id int) (*Astronaut, error)
 		UpdateAstronaut(ctx context.Context, a *Astronaut) error
 		DeleteAstronaut(ctx context.Context, id int) error
+		FindAstronauts(ctx context.Context) ([]*Astronaut, error)
+		FindAstronautByName(ctx context.Context, name string) ([]*Astronaut, error)
 	}
 
 	UserRepository interface {
-		CreateUser(ctx context.Context, u User) error
+		CreateUser(ctx context.Context, u *User) error
 		FindUserByID(ctx context.Context, id int) (*User, error)
 		FindUserByEmail(ctx context.Context, email string) (*User, error)
 		FindAllUsers(ctx context.Context) ([]*User, error)
@@ -120,7 +121,7 @@ type (
 	}
 
 	MissionRepository interface {
-		CreateMission(ctx context.Context, m Mission) error
+		CreateMission(ctx context.Context, m *Mission) error
 		FindMissionByID(ctx context.Context, id int) (*Mission, error)
 		FindMissionByNameOrAlias(ctx context.Context, target string) ([]*Mission, error)
 		FindAllMissions(ctx context.Context) ([]*Mission, error)

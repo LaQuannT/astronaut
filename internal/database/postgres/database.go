@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"database/sql"
@@ -17,4 +17,20 @@ func Connect(connStr string) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 	return db, nil
+}
+
+func InitializeRepositories(db *sql.DB) (
+	*AstronautRepository,
+	*AstronautLogRepository,
+	*AcademicLogRepository,
+	*MilitaryLogRepository,
+	*MissionRepository,
+	*UserRepository,
+) {
+	return newAstronautRepo(db),
+		newAstronautLogRepo(db),
+		newAcademicRepo(db),
+		newMilitaryLogRepo(db),
+		newMissionRepo(db),
+		newUserRepo(db)
 }

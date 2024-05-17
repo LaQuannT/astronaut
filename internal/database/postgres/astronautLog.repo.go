@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
-type AstronautLog struct {
+type AstronautLogRepository struct {
 	db *sql.DB
 }
 
-func NewAstronautLog(db *sql.DB) *AstronautLog {
-	return &AstronautLog{
+func newAstronautLogRepo(db *sql.DB) *AstronautLogRepository {
+	return &AstronautLogRepository{
 		db: db,
 	}
 }
 
-func (r *AstronautLog) CreateAstronautLog(ctx context.Context, a *model.AstronautLog) error {
+func (r *AstronautLogRepository) CreateAstronautLog(ctx context.Context, a *model.AstronautLog) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (r *AstronautLog) CreateAstronautLog(ctx context.Context, a *model.Astronau
 	return nil
 }
 
-func (r *AstronautLog) FindAstronautLogById(ctx context.Context, astronautID int) (*model.AstronautLog, error) {
+func (r *AstronautLogRepository) FindAstronautLogById(ctx context.Context, astronautID int) (*model.AstronautLog, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (r *AstronautLog) FindAstronautLogById(ctx context.Context, astronautID int
 	return aLog, nil
 }
 
-func (r *AstronautLog) FindAstronautLogs(ctx context.Context) ([]*model.AstronautLog, error) {
+func (r *AstronautLogRepository) FindAstronautLogs(ctx context.Context) ([]*model.AstronautLog, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (r *AstronautLog) FindAstronautLogs(ctx context.Context) ([]*model.Astronau
 	return aLogs, nil
 }
 
-func (r *AstronautLog) UpdateAstronautLog(ctx context.Context, a *model.AstronautLog) error {
+func (r *AstronautLogRepository) UpdateAstronautLog(ctx context.Context, a *model.AstronautLog) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (r *AstronautLog) UpdateAstronautLog(ctx context.Context, a *model.Astronau
 	return nil
 }
 
-func (r *AstronautLog) DeleteAstronautLog(ctx context.Context, astronautID int) error {
+func (r *AstronautLogRepository) DeleteAstronautLog(ctx context.Context, astronautID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err

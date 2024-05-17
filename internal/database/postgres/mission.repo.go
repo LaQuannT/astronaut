@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -7,17 +7,17 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
-type MissionRepo struct {
+type MissionRepository struct {
 	db *sql.DB
 }
 
-func NewMissionRepo(db *sql.DB) *MissionRepo {
-	return &MissionRepo{
+func newMissionRepo(db *sql.DB) *MissionRepository {
+	return &MissionRepository{
 		db: db,
 	}
 }
 
-func (r *MissionRepo) CreateMission(ctx context.Context, m *model.Mission) error {
+func (r *MissionRepository) CreateMission(ctx context.Context, m *model.Mission) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (r *MissionRepo) CreateMission(ctx context.Context, m *model.Mission) error
 
 	return nil
 }
-func (r *MissionRepo) FindMissionByID(ctx context.Context, id int) (*model.Mission, error) {
+func (r *MissionRepository) FindMissionByID(ctx context.Context, id int) (*model.Mission, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (r *MissionRepo) FindMissionByID(ctx context.Context, id int) (*model.Missi
 	return m, nil
 }
 
-func (r *MissionRepo) FindMissionByNameOrAlias(ctx context.Context, target string) ([]*model.Mission, error) {
+func (r *MissionRepository) FindMissionByNameOrAlias(ctx context.Context, target string) ([]*model.Mission, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (r *MissionRepo) FindMissionByNameOrAlias(ctx context.Context, target strin
 	return missions, nil
 }
 
-func (r *MissionRepo) FindAllMissions(ctx context.Context) ([]*model.Mission, error) {
+func (r *MissionRepository) FindAllMissions(ctx context.Context) ([]*model.Mission, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (r *MissionRepo) FindAllMissions(ctx context.Context) ([]*model.Mission, er
 	return missions, nil
 }
 
-func (r *MissionRepo) UpdateMission(ctx context.Context, m *model.Mission) error {
+func (r *MissionRepository) UpdateMission(ctx context.Context, m *model.Mission) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func (r *MissionRepo) UpdateMission(ctx context.Context, m *model.Mission) error
 	return nil
 }
 
-func (r *MissionRepo) CreateAstronautMission(ctx context.Context, missionID, astronautID int) error {
+func (r *MissionRepository) CreateAstronautMission(ctx context.Context, missionID, astronautID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func (r *MissionRepo) CreateAstronautMission(ctx context.Context, missionID, ast
 	return nil
 }
 
-func (r *MissionRepo) FindMissionsByAstronaut(ctx context.Context, astronautID int) ([]*model.Mission, error) {
+func (r *MissionRepository) FindMissionsByAstronaut(ctx context.Context, astronautID int) ([]*model.Mission, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func (r *MissionRepo) FindMissionsByAstronaut(ctx context.Context, astronautID i
 	return missions, nil
 }
 
-func (r *MissionRepo) DeleteAstronautMission(ctx context.Context, astronautID, missionID int) error {
+func (r *MissionRepository) DeleteAstronautMission(ctx context.Context, astronautID, missionID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -196,7 +196,7 @@ func (r *MissionRepo) DeleteAstronautMission(ctx context.Context, astronautID, m
 	return nil
 }
 
-func (r *MissionRepo) DeleteMission(ctx context.Context, missionID int) error {
+func (r *MissionRepository) DeleteMission(ctx context.Context, missionID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err

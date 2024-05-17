@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
-type MilitaryLogRepo struct {
+type MilitaryLogRepository struct {
 	db *sql.DB
 }
 
-func NewMilitaryLogRepo(db *sql.DB) *MilitaryLogRepo {
-	return &MilitaryLogRepo{
+func newMilitaryLogRepo(db *sql.DB) *MilitaryLogRepository {
+	return &MilitaryLogRepository{
 		db: db,
 	}
 }
 
-func (r *MilitaryLogRepo) CreateMilitaryLog(ctx context.Context, m *model.MilitaryLog) error {
+func (r *MilitaryLogRepository) CreateMilitaryLog(ctx context.Context, m *model.MilitaryLog) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (r *MilitaryLogRepo) CreateMilitaryLog(ctx context.Context, m *model.Milita
 	return nil
 }
 
-func (r *MilitaryLogRepo) FindMilitaryLog(ctx context.Context, astronautID int) (*model.MilitaryLog, error) {
+func (r *MilitaryLogRepository) FindMilitaryLog(ctx context.Context, astronautID int) (*model.MilitaryLog, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (r *MilitaryLogRepo) FindMilitaryLog(ctx context.Context, astronautID int) 
 	return m, nil
 }
 
-func (r *MilitaryLogRepo) FindAllMilitaryLogs(ctx context.Context) ([]*model.MilitaryLog, error) {
+func (r *MilitaryLogRepository) FindAllMilitaryLogs(ctx context.Context) ([]*model.MilitaryLog, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (r *MilitaryLogRepo) FindAllMilitaryLogs(ctx context.Context) ([]*model.Mil
 	return mLogs, nil
 }
 
-func (r *MilitaryLogRepo) UpdateMilitaryLog(ctx context.Context, m *model.MilitaryLog) error {
+func (r *MilitaryLogRepository) UpdateMilitaryLog(ctx context.Context, m *model.MilitaryLog) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (r *MilitaryLogRepo) UpdateMilitaryLog(ctx context.Context, m *model.Milita
 	return nil
 }
 
-func (r *MilitaryLogRepo) DeleteMilitaryLog(ctx context.Context, astronautID int) error {
+func (r *MilitaryLogRepository) DeleteMilitaryLog(ctx context.Context, astronautID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err

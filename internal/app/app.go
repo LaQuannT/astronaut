@@ -1,36 +1,43 @@
 package app
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/LaQuannT/astronaut-api/internal/database"
+	"github.com/LaQuannT/astronaut-api/internal/config"
+	"github.com/LaQuannT/astronaut-api/internal/database/postgres"
+	"github.com/LaQuannT/astronaut-api/internal/transport"
 	"log"
+	"net"
 	"net/http"
 )
 
-type App struct {
-	Router *http.ServeMux
-	DB     *sql.DB
-}
-
-func (a *App) Initialize(username, password, host, port, dbname, sslmode string) {
+func initialize(c *config.Config) http.Handler {
 	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
-		username, password, host, port, dbname, sslmode)
+		c.DBUsername, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.DBSSLMode)
 
-	var err error
-	a.DB, err = database.Connect(connStr)
+	_, err := postgres.Connect(connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	a.Router = http.NewServeMux()
+	handler := transport.NewServer()
+	return handler
 }
 
-func (a *App) Run(port string) {
-	port = fmt.Sprintf(":%s", port)
+func Run() {
+	c, err := config.New()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	log.Printf("Starting server on port %s", port)
-	err := http.ListenAndServe(port, a.Router)
+	handler := initialize(c)
+
+	srv := &http.Server{
+		Addr:    net.JoinHostPort(c.Host, c.Port),
+		Handler: handler,
+	}
+
+	log.Printf("Server listening on %q", srv.Addr)
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
-type UserRepo struct {
+type UserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) *UserRepo {
-	return &UserRepo{
+func newUserRepo(db *sql.DB) *UserRepository {
+	return &UserRepository{
 		db: db,
 	}
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, u *model.User) error {
+func (r *UserRepository) CreateUser(ctx context.Context, u *model.User) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (r *UserRepo) CreateUser(ctx context.Context, u *model.User) error {
 	return nil
 }
 
-func (r *UserRepo) FindUserByID(ctx context.Context, id int) (*model.User, error) {
+func (r *UserRepository) FindUserByID(ctx context.Context, id int) (*model.User, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (r *UserRepo) FindUserByID(ctx context.Context, id int) (*model.User, error
 	return u, nil
 }
 
-func (r *UserRepo) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
+func (r *UserRepository) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (r *UserRepo) FindUserByEmail(ctx context.Context, email string) (*model.Us
 	return u, nil
 }
 
-func (r *UserRepo) FindAllUsers(ctx context.Context) ([]*model.User, error) {
+func (r *UserRepository) FindAllUsers(ctx context.Context) ([]*model.User, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (r *UserRepo) FindAllUsers(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func (r *UserRepo) UpdateUser(ctx context.Context, u *model.User) error {
+func (r *UserRepository) UpdateUser(ctx context.Context, u *model.User) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func (r *UserRepo) UpdateUser(ctx context.Context, u *model.User) error {
 	return nil
 }
 
-func (r *UserRepo) RestUserPassword(ctx context.Context, hash string, id int) error {
+func (r *UserRepository) RestUserPassword(ctx context.Context, hash string, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (r *UserRepo) RestUserPassword(ctx context.Context, hash string, id int) er
 	return nil
 }
 
-func (r *UserRepo) GenerateNewUserAPIKey(ctx context.Context, id int) (string, error) {
+func (r *UserRepository) GenerateNewUserAPIKey(ctx context.Context, id int) (string, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return "", err
@@ -164,7 +164,7 @@ func (r *UserRepo) GenerateNewUserAPIKey(ctx context.Context, id int) (string, e
 	return key, nil
 }
 
-func (r *UserRepo) DeleteUser(ctx context.Context, id int) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -194,7 +194,7 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *UserRepo) GiveAdminPrivileges(ctx context.Context, id int) error {
+func (r *UserRepository) GiveAdminPrivileges(ctx context.Context, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -211,7 +211,7 @@ func (r *UserRepo) GiveAdminPrivileges(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *UserRepo) RevokeAdminPrivileges(ctx context.Context, id int) error {
+func (r *UserRepository) RevokeAdminPrivileges(ctx context.Context, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err

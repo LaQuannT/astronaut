@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
-type AcademicLogRepo struct {
+type AcademicLogRepository struct {
 	db *sql.DB
 }
 
-func NewAcademicRepo(db *sql.DB) *AcademicLogRepo {
-	return &AcademicLogRepo{
+func newAcademicRepo(db *sql.DB) *AcademicLogRepository {
+	return &AcademicLogRepository{
 		db: db,
 	}
 }
 
-func (r *AcademicLogRepo) CreateMajor(ctx context.Context, m *model.Major) error {
+func (r *AcademicLogRepository) CreateMajor(ctx context.Context, m *model.Major) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (r *AcademicLogRepo) CreateMajor(ctx context.Context, m *model.Major) error
 	return nil
 }
 
-func (r *AcademicLogRepo) CreateAlmaMater(ctx context.Context, a *model.AlmaMater) error {
+func (r *AcademicLogRepository) CreateAlmaMater(ctx context.Context, a *model.AlmaMater) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (r *AcademicLogRepo) CreateAlmaMater(ctx context.Context, a *model.AlmaMate
 	return nil
 }
 
-func (r *AcademicLogRepo) AddUnderGradMajor(ctx context.Context, astronautID, majorID int) error {
+func (r *AcademicLogRepository) AddUnderGradMajor(ctx context.Context, astronautID, majorID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (r *AcademicLogRepo) AddUnderGradMajor(ctx context.Context, astronautID, ma
 	return nil
 }
 
-func (r *AcademicLogRepo) AddGradMajor(ctx context.Context, astronautID, majorID int) error {
+func (r *AcademicLogRepository) AddGradMajor(ctx context.Context, astronautID, majorID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (r *AcademicLogRepo) AddGradMajor(ctx context.Context, astronautID, majorID
 	return nil
 }
 
-func (r *AcademicLogRepo) AddAstronautAlmaMater(ctx context.Context, astronautID, almaMaterID int) error {
+func (r *AcademicLogRepository) AddAstronautAlmaMater(ctx context.Context, astronautID, almaMaterID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (r *AcademicLogRepo) AddAstronautAlmaMater(ctx context.Context, astronautID
 	return nil
 }
 
-func (r *AcademicLogRepo) UpdateMajor(ctx context.Context, m *model.Major) error {
+func (r *AcademicLogRepository) UpdateMajor(ctx context.Context, m *model.Major) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (r *AcademicLogRepo) UpdateMajor(ctx context.Context, m *model.Major) error
 	return nil
 }
 
-func (r *AcademicLogRepo) UpdateAlmaMater(ctx context.Context, a *model.AlmaMater) error {
+func (r *AcademicLogRepository) UpdateAlmaMater(ctx context.Context, a *model.AlmaMater) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (r *AcademicLogRepo) UpdateAlmaMater(ctx context.Context, a *model.AlmaMate
 	return nil
 }
 
-func (r *AcademicLogRepo) FindMajorByID(ctx context.Context, id int) (*model.Major, error) {
+func (r *AcademicLogRepository) FindMajorByID(ctx context.Context, id int) (*model.Major, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ func (r *AcademicLogRepo) FindMajorByID(ctx context.Context, id int) (*model.Maj
 	return m, nil
 }
 
-func (r *AcademicLogRepo) FindAlmaMaterByID(ctx context.Context, id int) (*model.AlmaMater, error) {
+func (r *AcademicLogRepository) FindAlmaMaterByID(ctx context.Context, id int) (*model.AlmaMater, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -177,7 +177,7 @@ func (r *AcademicLogRepo) FindAlmaMaterByID(ctx context.Context, id int) (*model
 	return m, nil
 }
 
-func (r *AcademicLogRepo) FindAstronautUnderGradMajors(ctx context.Context, astronautID int) ([]*model.Major, error) {
+func (r *AcademicLogRepository) FindAstronautUnderGradMajors(ctx context.Context, astronautID int) ([]*model.Major, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func (r *AcademicLogRepo) FindAstronautUnderGradMajors(ctx context.Context, astr
 	return majors, nil
 }
 
-func (r *AcademicLogRepo) FindAstronautGradMajors(ctx context.Context, astronautID int) ([]*model.Major, error) {
+func (r *AcademicLogRepository) FindAstronautGradMajors(ctx context.Context, astronautID int) ([]*model.Major, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -239,7 +239,7 @@ func (r *AcademicLogRepo) FindAstronautGradMajors(ctx context.Context, astronaut
 	return majors, nil
 }
 
-func (r *AcademicLogRepo) FindAstronautAlmaMaters(ctx context.Context, astronautID int) ([]*model.AlmaMater, error) {
+func (r *AcademicLogRepository) FindAstronautAlmaMaters(ctx context.Context, astronautID int) ([]*model.AlmaMater, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
@@ -270,7 +270,7 @@ func (r *AcademicLogRepo) FindAstronautAlmaMaters(ctx context.Context, astronaut
 	return almaMaters, nil
 }
 
-func (r *AcademicLogRepo) DeleteMajor(ctx context.Context, id int) error {
+func (r *AcademicLogRepository) DeleteMajor(ctx context.Context, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -301,7 +301,7 @@ func (r *AcademicLogRepo) DeleteMajor(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *AcademicLogRepo) DeleteAstronautUnderGradMajor(ctx context.Context, astronautID, majorID int) error {
+func (r *AcademicLogRepository) DeleteAstronautUnderGradMajor(ctx context.Context, astronautID, majorID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -319,7 +319,7 @@ func (r *AcademicLogRepo) DeleteAstronautUnderGradMajor(ctx context.Context, ast
 	return nil
 }
 
-func (r *AcademicLogRepo) DeleteAstronautGradMajor(ctx context.Context, astronautID, majorID int) error {
+func (r *AcademicLogRepository) DeleteAstronautGradMajor(ctx context.Context, astronautID, majorID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -337,7 +337,7 @@ func (r *AcademicLogRepo) DeleteAstronautGradMajor(ctx context.Context, astronau
 	return nil
 }
 
-func (r *AcademicLogRepo) DeleteAlmaMater(ctx context.Context, id int) error {
+func (r *AcademicLogRepository) DeleteAlmaMater(ctx context.Context, id int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -360,7 +360,7 @@ func (r *AcademicLogRepo) DeleteAlmaMater(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *AcademicLogRepo) DeleteAstronautAlmaMater(ctx context.Context, astronautID, majorID int) error {
+func (r *AcademicLogRepository) DeleteAstronautAlmaMater(ctx context.Context, astronautID, majorID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
