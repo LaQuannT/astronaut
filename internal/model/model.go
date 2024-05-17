@@ -1,6 +1,9 @@
 package model
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type status string
 
@@ -11,39 +14,71 @@ const (
 	Deceased   status = "deceased"
 )
 
-// array (seperated by) -- missions (,), gradute major, undergrad, almamater (;)
+// array (seperated by) -- missions (,), gradute major, undergrad, almamater (;) or refactor CSV
+//
+//	to fit my structs?
+type AstronautData struct {
+	Name               string   `json:"name" csv:"Name"`
+	Year               int      `json:"year" csv:"Year"`
+	Group              int      `json:"group" csv:"Group"`
+	Status             string   `json:"status" csv:"Status"`
+	BirthDate          string   `json:"birthDate" csv:"Birth Date"`
+	BirthPlace         string   `json:"birthPlace" csv:"Birth Place"`
+	Gender             string   `json:"gender" csv:"Gender"`
+	AlmaMater          []string `json:"almaMater" csv:"Alma Mater"`
+	UndergraduateMajor []string `json:"undergraduateMajor" csv:"Undergraduate Major"`
+	GraduateMajor      []string `json:"graduateMajor" csv:"Graduate Major"`
+	MilitaryRank       string   `json:"militaryRank" csv:"Military Rank"`
+	MilitaryBranch     string   `json:"militaryBranch" csv:"Military Branch"`
+	SpaceFlights       int      `json:"spaceFlights" csv:"Space Flights"`
+	SpaceFlightHours   int      `json:"spaceFlightHours" csv:"Space Flight (hr)"`
+	SpaceWalks         int      `json:"spaceWalks" csv:"Space Walks"`
+	SpaceWalkHours     int      `json:"spaceWalkHours" csv:"Space Walk (hr)"`
+	Missions           []string `json:"missions" csv:"Missions"`
+	DeathDate          string   `json:"deathDate" csv:"Death Date"`
+	DeathMission       string   `json:"deathMission" csv:"Death Mission"`
+}
+
+type Astronaut struct {
+	ID         int    `json:"id"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Gender     string `json:"gender"`
+	BirthDate  string `json:"birthDate"`
+	BirthPlace string `json:"birthPlace"`
+}
+
+func (a *Astronaut) Valid() (map[string]string, bool) {
+	m := make(map[string]string)
+	if a.FirstName == "" {
+		m["FirstName"] = "first name must not be empty"
+	}
+	if a.LastName == "" {
+		m["LastName"] = "last name must not be empty"
+	}
+	if a.Gender != "F" && a.Gender != "M" {
+		m["Gender"] = "gender must be either 'M' or 'F'"
+	}
+	if a.BirthDate == "" {
+		m["BirthDate"] = "birth date must not be empty"
+	} else if a.BirthDate != "" {
+		_, err := time.Parse(time.DateOnly, a.BirthDate)
+		if err != nil {
+			m["BirthDate"] = "birth date must be a valid date yyyy-mm-dd"
+		}
+
+	}
+	if a.BirthPlace == "" {
+		m["BirthPlace"] = "birth place must not be empty"
+	}
+
+	if len(m) > 0 {
+		return m, false
+	}
+	return m, true
+}
+
 type (
-	AstronautData struct {
-		Name               string   `json:"name" csv:"Name"`
-		Year               int      `json:"year" csv:"Year"`
-		Group              int      `json:"group" csv:"Group"`
-		Status             string   `json:"status" csv:"Status"`
-		BirthDate          string   `json:"birthDate" csv:"Birth Date"`
-		BirthPlace         string   `json:"birthPlace" csv:"Birth Place"`
-		Gender             string   `json:"gender" csv:"Gender"`
-		AlmaMater          []string `json:"almaMater" csv:"Alma Mater"`
-		UndergraduateMajor []string `json:"undergraduateMajor" csv:"Undergraduate Major"`
-		GraduateMajor      []string `json:"graduateMajor" csv:"Graduate Major"`
-		MilitaryRank       string   `json:"militaryRank" csv:"Military Rank"`
-		MilitaryBranch     string   `json:"militaryBranch" csv:"Military Branch"`
-		SpaceFlights       int      `json:"spaceFlights" csv:"Space Flights"`
-		SpaceFlightHours   int      `json:"spaceFlightHours" csv:"Space Flight (hr)"`
-		SpaceWalks         int      `json:"spaceWalks" csv:"Space Walks"`
-		SpaceWalkHours     int      `json:"spaceWalkHours" csv:"Space Walk (hr)"`
-		Missions           []string `json:"missions" csv:"Missions"`
-		DeathDate          string   `json:"deathDate" csv:"Death Date"`
-		DeathMission       string   `json:"deathMission" csv:"Death Mission"`
-	}
-
-	Astronaut struct {
-		ID         int    `json:"id"`
-		FirstName  string `json:"firstName"`
-		LastName   string `json:"lastName"`
-		Gender     string `json:"gender"`
-		BirthDate  string `json:"birthDate"`
-		BirthPlace string `json:"birthPlace"`
-	}
-
 	User struct {
 		ID        int    `json:"id"`
 		FirstName string `json:"firstName"`
@@ -158,6 +193,7 @@ type (
 		DeleteAstronautGradMajor(ctx context.Context, astronautID, majorID int) error
 		DeleteAlmaMater(ctx context.Context, id int) error
 		DeleteAstronautAlmaMater(ctx context.Context, astronautID, majorID int) error
+		GetAcademicLog(ctx context.Context, astronautID int) (*AcademicLog, error)
 	}
 
 	AstronautLogRepository interface {

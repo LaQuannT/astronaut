@@ -376,3 +376,24 @@ func (r *AcademicLogRepository) DeleteAstronautAlmaMater(ctx context.Context, as
 
 	return nil
 }
+
+func (r *AcademicLogRepository) GetAcademicLog(ctx context.Context, astronautID int) (*model.AcademicLog, error) {
+	log := new(model.AcademicLog)
+	var err error
+
+	log.AstronautID = astronautID
+
+	log.AlmaMaters, err = r.FindAstronautAlmaMaters(ctx, astronautID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.GradMajors, err = r.FindAstronautGradMajors(ctx, astronautID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.UnderGradMajors, err = r.FindAstronautUnderGradMajors(ctx, astronautID)
+
+	return log, nil
+}
