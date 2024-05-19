@@ -27,7 +27,7 @@ func InitializeRepositories(db *sql.DB) (
 	*MissionRepository,
 	*UserRepository,
 ) {
-	return newAstronautRepo(db),
+	return NewAstronautRepo(db),
 		newAstronautLogRepo(db),
 		newAcademicRepo(db),
 		newMilitaryLogRepo(db),

@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/LaQuannT/astronaut-api/internal/model"
 	"net/http"
 	"time"
@@ -13,7 +15,7 @@ func AddAstronaut(ctx context.Context, a *model.Astronaut, r model.AstronautRepo
 	if !isValid {
 		msg := "Invalid Astronaut input"
 		for _, problem := range problems {
-			msg = msg + "; " + problem
+			msg = fmt.Sprintf("%s; %s", msg, problem)
 		}
 		return nil, &model.APIError{
 			Code:    http.StatusBadRequest,
@@ -47,7 +49,7 @@ func GetAstronaut(
 
 	astronaut, err := ar.FindAstronautByID(ctx, id)
 	switch {
-	case err == sql.ErrNoRows:
+	case errors.Is(err, sql.ErrNoRows):
 		return nil, &model.APIError{
 			Code:      http.StatusNotFound,
 			Message:   "not found",
@@ -59,9 +61,9 @@ func GetAstronaut(
 			Message:   "failed to retrieve astronaut",
 			Exception: err.Error(),
 		}
+	default:
+		return astronaut, nil
 	}
-
-	return astronaut, err
 }
 
 func GetAstronauts(ctx context.Context, r model.AstronautRepository) ([]*model.Astronaut, error) {

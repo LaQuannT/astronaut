@@ -6,7 +6,7 @@ type APIError struct {
 	Exception string
 }
 
-func (e *APIError) Error() string {
+func (e APIError) Error() string {
 	return e.Exception
 }
 

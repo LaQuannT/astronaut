@@ -11,7 +11,7 @@ type AstronautRepository struct {
 	db *sql.DB
 }
 
-func newAstronautRepo(db *sql.DB) *AstronautRepository {
+func NewAstronautRepo(db *sql.DB) *AstronautRepository {
 	return &AstronautRepository{
 		db: db,
 	}
@@ -44,7 +44,7 @@ func (r *AstronautRepository) FindAstronautByID(ctx context.Context, id int) (*m
 	a := new(model.Astronaut)
 
 	stmt := `SELECT * FROM astronaut WHERE id = $1;`
-	err = tx.QueryRowContext(ctx, stmt, id).Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthPlace)
+	err = tx.QueryRowContext(ctx, stmt, id).Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthDate, &a.BirthPlace)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (r *AstronautRepository) FindAstronauts(ctx context.Context) ([]*model.Astr
 
 	for rows.Next() {
 		var a model.Astronaut
-		err := rows.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthPlace)
+		err := rows.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthDate, &a.BirthPlace)
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +136,7 @@ func (r *AstronautRepository) FindAstronautByName(ctx context.Context, name stri
 
 	for rows.Next() {
 		var a model.Astronaut
-		err := rows.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthPlace)
+		err := rows.Scan(&a.ID, &a.FirstName, &a.LastName, &a.Gender, &a.BirthDate, &a.BirthPlace)
 		if err != nil {
 			return nil, err
 		}

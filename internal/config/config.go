@@ -12,7 +12,6 @@ type Config struct {
 	DBHost     string
 	DBPort     string
 	DBSSLMode  string
-	TestDBName string
 	Port       string
 	Host       string
 }
@@ -48,11 +47,6 @@ func New() (*Config, error) {
 		return nil, errors.New("DB_SSL_MODE environment variable not set")
 	}
 
-	testDBName, ok := os.LookupEnv("TEST_DB_NAME")
-	if !ok {
-		return nil, errors.New("TEST_DB_NAME environment variable not set")
-	}
-
 	port, ok := os.LookupEnv("APP_PORT")
 	if !ok {
 		return nil, errors.New("APP_PORT environment variable not set")
@@ -70,7 +64,6 @@ func New() (*Config, error) {
 		DBHost:     dbHost,
 		DBPort:     dbPort,
 		DBSSLMode:  sslMode,
-		TestDBName: testDBName,
 		Port:       port,
 		Host:       host,
 	}, nil
