@@ -4,23 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/LaQuannT/astronaut-api/internal/model"
 	"net/http"
 	"time"
 )
 
 func AddAstronaut(ctx context.Context, a *model.Astronaut, r model.AstronautRepository) (*model.Astronaut, error) {
-	problems, isValid := a.Valid()
-	if !isValid {
-		msg := "Invalid Astronaut input"
-		for _, problem := range problems {
-			msg = fmt.Sprintf("%s; %s", msg, problem)
-		}
-		return nil, &model.APIError{
-			Code:    http.StatusBadRequest,
-			Message: msg,
-		}
+	if err := validate(a, "Astronaut"); err != nil {
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -86,16 +77,8 @@ func UpdateAstronaut(ctx context.Context, a *model.Astronaut, r model.AstronautR
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	problems, isValid := a.Valid()
-	if !isValid {
-		msg := "Invalid Astronaut input"
-		for _, problem := range problems {
-			msg = msg + "; " + problem
-		}
-		return &model.APIError{
-			Code:    http.StatusBadRequest,
-			Message: msg,
-		}
+	if err := validate(a, "Astronaut"); err != nil {
+		return err
 	}
 
 	err := r.UpdateAstronaut(ctx, a)
@@ -143,9 +126,6 @@ func SearchAstronautByName(ctx context.Context, r model.AstronautRepository, nam
 			Message:   "failed to search astronauts",
 			Exception: err.Error(),
 		}
-	}
-	if len(astronauts) == 0 {
-		return nil, nil
 	}
 	return astronauts, nil
 }
