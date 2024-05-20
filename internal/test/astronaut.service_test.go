@@ -173,3 +173,79 @@ func TestSearchAstronautByName(t *testing.T) {
 		assert.Equal(t, "doe", astronauts[0].LastName)
 	})
 }
+
+func TestUpdateAstronaut(t *testing.T) {
+	err := clearTables(dbConn)
+	if err != nil {
+		t.Fatalf("Error clearing tables: %v", err)
+	}
+	ctx := context.TODO()
+
+	a := &model.Astronaut{
+		FirstName:  "james",
+		LastName:   "smith",
+		Gender:     "M",
+		BirthDate:  "1999-01-01",
+		BirthPlace: "london,uk",
+	}
+
+	a, err = service.AddAstronaut(ctx, a, astroRepo)
+	if err != nil {
+		t.Fatalf("Unexpected error adding Astronaut: %v", err)
+	}
+
+	t.Run("returns an error for invalid update astronaut input", func(t *testing.T) {
+		astronaut := &model.Astronaut{
+			ID:        1,
+			FirstName: "",
+			LastName:  a.LastName,
+			Gender:    "",
+			BirthDate: a.BirthDate,
+		}
+
+		if err := service.UpdateAstronaut(ctx, astronaut, astroRepo); err == nil {
+			t.Errorf("Expected error for invalid update astronaut")
+		}
+	})
+
+	t.Run("returns an updated astronaut", func(t *testing.T) {
+		astronaut := &model.Astronaut{
+			ID:         1,
+			FirstName:  "cindy",
+			LastName:   a.LastName,
+			Gender:     "F",
+			BirthDate:  a.BirthDate,
+			BirthPlace: "salford,uk",
+		}
+
+		if err := service.UpdateAstronaut(ctx, astronaut, astroRepo); err != nil {
+			t.Errorf("Unexpected error updating Astronaut: %v", err)
+		}
+		a, err = service.GetAstronaut(ctx, astroRepo, astronaut.ID)
+		if err != nil {
+			t.Errorf("Unexpected error getting updated Astronaut: %v", err)
+		}
+		assert.Equal(t, astronaut.ID, a.ID)
+		assert.Equal(t, astronaut.FirstName, a.FirstName)
+		assert.Equal(t, astronaut.Gender, a.Gender)
+		assert.Equal(t, astronaut.BirthPlace, a.BirthPlace)
+	})
+}
+
+func TestDeleteAstronaut(t *testing.T) {
+	ctx := context.TODO()
+
+	t.Run("returns an error for unknown astronaut ID", func(t *testing.T) {
+		id := 7
+		if err := service.DeleteAstronaut(ctx, astroRepo, id); err == nil {
+			t.Errorf("Expected error for unknown astronaut ID")
+		}
+	})
+
+	t.Run("deletes an astronaut", func(t *testing.T) {
+		id := 1
+		if err := service.DeleteAstronaut(ctx, astroRepo, id); err != nil {
+			t.Errorf("Unexpected error deleting Astronaut: %v", err)
+		}
+	})
+}

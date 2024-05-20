@@ -1,5 +1,9 @@
 package model
 
+import "errors"
+
+var ErrNoChange = errors.New("sql: no rows effected")
+
 type APIError struct {
 	Message   string
 	Code      int

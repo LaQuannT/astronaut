@@ -62,9 +62,17 @@ func (r *AstronautRepository) UpdateAstronaut(ctx context.Context, a *model.Astr
 
 	stmt := `UPDATE astronaut SET first_name=$1, last_name=$2, gender=$3, birth_date=$4, birth_place=$5 WHERE id = $6;`
 
-	_, err = tx.ExecContext(ctx, stmt, a.FirstName, a.LastName, a.Gender, a.BirthDate, a.BirthPlace, a.ID)
+	result, err := tx.ExecContext(ctx, stmt, a.FirstName, a.LastName, a.Gender, a.BirthDate, a.BirthPlace, a.ID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 	return nil
@@ -78,9 +86,17 @@ func (r *AstronautRepository) DeleteAstronaut(ctx context.Context, id int) error
 	defer tx.Rollback()
 
 	stmt := `DELETE FROM astronaut WHERE id = $1;`
-	_, err = tx.ExecContext(ctx, stmt, id)
+	result, err := tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 	return nil

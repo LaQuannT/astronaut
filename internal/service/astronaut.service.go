@@ -114,7 +114,15 @@ func DeleteAstronaut(ctx context.Context, r model.AstronautRepository, id int) e
 	defer cancel()
 
 	err := r.DeleteAstronaut(ctx, id)
-	if err != nil {
+	switch {
+	case errors.Is(err, model.ErrNoChange):
+		return &model.APIError{
+			Code:      http.StatusNotFound,
+			Message:   "not found",
+			Exception: err.Error(),
+		}
+
+	case err != nil:
 		return &model.APIError{
 			Code:      http.StatusInternalServerError,
 			Message:   "failed to delete astronaut",
