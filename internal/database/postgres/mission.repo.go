@@ -120,9 +120,17 @@ func (r *MissionRepository) UpdateMission(ctx context.Context, m *model.Mission)
 
 	stmt := `UPDATE mission SET name=$1, alias=$2, date_of_mission=$3, successful=$4 WHERE id=$5;`
 
-	_, err = tx.ExecContext(ctx, stmt, m.Name, m.Alias, m.DateOfMission, m.Successful, m.ID)
+	result, err := tx.ExecContext(ctx, stmt, m.Name, m.Alias, m.DateOfMission, m.Successful, m.ID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 
@@ -204,9 +212,17 @@ func (r *MissionRepository) DeleteMission(ctx context.Context, missionID int) er
 	defer tx.Rollback()
 
 	stmt := `DELETE FROM mission WHERE id=$1;`
-	_, err = tx.ExecContext(ctx, stmt, missionID)
+	result, err := tx.ExecContext(ctx, stmt, missionID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 
 	stmt = `DELETE FROM astronaut_mission WHERE mission_id=$1;`

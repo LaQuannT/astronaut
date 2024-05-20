@@ -78,6 +78,33 @@ func (a *Astronaut) Valid() (map[string]string, bool) {
 	return m, true
 }
 
+type Mission struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	Alias         string `json:"alias"`
+	DateOfMission string `json:"dateOfMission"`
+	Successful    bool   `json:"successful"`
+}
+
+func (m *Mission) Valid() (map[string]string, bool) {
+	problems := make(map[string]string)
+	if m.Name == "" {
+		problems["Name"] = "name must not be empty"
+	}
+	if m.DateOfMission == "" {
+		problems["DateOfMission"] = "dateOfMission must not be empty"
+	} else if m.DateOfMission != "" {
+		_, err := time.Parse(time.DateOnly, m.DateOfMission)
+		if err != nil {
+			problems["DateOfMission"] = "dateOfMission must be a valid date yyyy-mm-dd"
+		}
+	}
+	if len(problems) > 0 {
+		return problems, false
+	}
+	return problems, true
+}
+
 type (
 	User struct {
 		ID        int    `json:"id"`
@@ -88,14 +115,6 @@ type (
 		APIKey    string `json:"apiKey,omitempty"`
 		CreatedAt string `json:"createdAt"`
 		UpdatedAt string `json:"updatedAt"`
-	}
-
-	Mission struct {
-		ID            int    `json:"id"`
-		Name          string `json:"name"`
-		Alias         string `json:"alias"`
-		DateOfMission string `json:"dateOfMission"`
-		Successful    bool   `json:"successful"`
 	}
 
 	MilitaryLog struct {
