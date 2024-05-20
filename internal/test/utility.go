@@ -45,8 +45,23 @@ func clearTables(db *sql.DB) error {
 	}
 	defer tx.Rollback()
 
-	stmt := `DELETE FROM astronaut;
+	stmt := `DELETE FROM astronaut_mission;`
+
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = `DELETE FROM astronaut;
 	ALTER SEQUENCE astronaut_id_seq RESTART WITH 1;`
+
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = `DELETE FROM mission;
+	ALTER SEQUENCE 	mission_id_seq RESTART WITH 1;`
 
 	_, err = tx.ExecContext(ctx, stmt)
 	if err != nil {

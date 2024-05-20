@@ -24,9 +24,9 @@ func (r *MissionRepository) CreateMission(ctx context.Context, m *model.Mission)
 	}
 	defer tx.Rollback()
 
-	stmt := `INSERT INTO mission (id, name, "alias", date_of_mission, successful) VALUES ($1, $2, $3, $4, $5) RETURNING id;`
+	stmt := `INSERT INTO mission (name, "alias", date_of_mission, successful) VALUES ($1, $2, $3, $4) RETURNING id;`
 
-	err = tx.QueryRowContext(ctx, stmt, m.ID, m.Name, m.Alias, m.Successful).Scan(&m.ID)
+	err = tx.QueryRowContext(ctx, stmt, m.Name, m.Alias, m.DateOfMission, m.Successful).Scan(&m.ID)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (r *MissionRepository) FindMissionByNameOrAlias(ctx context.Context, target
 
 	for rows.Next() {
 		m := new(model.Mission)
-		if err := rows.Scan(&m.ID, &m.Name, &m.Alias, &m.Successful); err != nil {
+		if err := rows.Scan(&m.ID, &m.Name, &m.Alias, &m.DateOfMission, &m.Successful); err != nil {
 			return nil, err
 		}
 		missions = append(missions, m)
@@ -101,7 +101,7 @@ func (r *MissionRepository) FindAllMissions(ctx context.Context) ([]*model.Missi
 
 	for rows.Next() {
 		m := new(model.Mission)
-		if err := rows.Scan(&m.ID, &m.Name, &m.Alias, &m.Successful); err != nil {
+		if err := rows.Scan(&m.ID, &m.Name, &m.Alias, &m.DateOfMission, &m.Successful); err != nil {
 			return nil, err
 		}
 		missions = append(missions, m)
@@ -137,16 +137,16 @@ func (r *MissionRepository) UpdateMission(ctx context.Context, m *model.Mission)
 	return nil
 }
 
-func (r *MissionRepository) CreateAstronautMission(ctx context.Context, missionID, astronautID int) error {
+func (r *MissionRepository) CreateAstronautMission(ctx context.Context, astronautID, missionID int) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	stmt := `INSERT INTO astronaut_mission (mission_id, astronaut_id) VALUES ($1, $2);`
+	stmt := `INSERT INTO astronaut_mission (astronaut_id, mission_id) VALUES ($1, $2);`
 
-	_, err = tx.ExecContext(ctx, stmt, missionID, astronautID)
+	_, err = tx.ExecContext(ctx, stmt, astronautID, missionID)
 	if err != nil {
 		return err
 	}
@@ -162,9 +162,9 @@ func (r *MissionRepository) FindMissionsByAstronaut(ctx context.Context, astrona
 	}
 	defer tx.Rollback()
 
-	stmt := `SELECT id, name, "alias", date_of_mission, successful FROM mission AS M
-        INNER JOIN  astronaut_mission AS am ON am.astronaut_id = m.astronaut_id 
-        WHERE am.astronaut_id=$1;`
+	stmt := `SELECT m.id, name, "alias", date_of_mission, successful FROM astronaut_mission AS am 
+	INNER JOIN mission AS m ON m.id = am.mission_id
+	WHERE am.astronaut_id =$1;`
 
 	rows, err := tx.QueryContext(ctx, stmt, astronautID)
 	if err != nil {
@@ -195,24 +195,7 @@ func (r *MissionRepository) DeleteAstronautMission(ctx context.Context, astronau
 
 	stmt := `DELETE FROM astronaut_mission WHERE astronaut_id=$1 AND mission_id=$2;`
 
-	_, err = tx.ExecContext(ctx, stmt, astronautID, missionID)
-	if err != nil {
-		return err
-	}
-	tx.Commit()
-
-	return nil
-}
-
-func (r *MissionRepository) DeleteMission(ctx context.Context, missionID int) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	stmt := `DELETE FROM mission WHERE id=$1;`
-	result, err := tx.ExecContext(ctx, stmt, missionID)
+	result, err := tx.ExecContext(ctx, stmt, astronautID, missionID)
 	if err != nil {
 		return err
 	}
@@ -225,10 +208,36 @@ func (r *MissionRepository) DeleteMission(ctx context.Context, missionID int) er
 		return model.ErrNoChange
 	}
 
-	stmt = `DELETE FROM astronaut_mission WHERE mission_id=$1;`
+	tx.Commit()
+
+	return nil
+}
+
+func (r *MissionRepository) DeleteMission(ctx context.Context, missionID int) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt := `DELETE FROM astronaut_mission WHERE mission_id=$1;`
 	_, err = tx.ExecContext(ctx, stmt, missionID)
 	if err != nil {
 		return err
+	}
+
+	stmt = `DELETE FROM mission WHERE id=$1;`
+	result, err := tx.ExecContext(ctx, stmt, missionID)
+	if err != nil {
+		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 

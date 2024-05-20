@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LaQuannT/astronaut-api/internal/model"
+	"github.com/lib/pq"
 	"net/http"
 	"time"
 )
@@ -19,12 +20,21 @@ func AddMission(ctx context.Context, r model.MissionRepository, m *model.Mission
 	defer cancel()
 
 	if err := r.CreateMission(ctx, m); err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, &model.APIError{
+				Code:      http.StatusBadRequest,
+				Message:   "Mission already exists",
+				Exception: pgErr.Message,
+			}
+		}
 		return nil, &model.APIError{
 			Code:      http.StatusInternalServerError,
 			Message:   "fail to add mission",
 			Exception: err.Error(),
 		}
 	}
+
 	return m, nil
 }
 
@@ -132,14 +142,23 @@ func RemoveAstronautFromMission(ctx context.Context, r model.MissionRepository, 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	if err := r.DeleteAstronautMission(ctx, astronautID, missionID); err != nil {
+	err := r.DeleteAstronautMission(ctx, astronautID, missionID)
+	switch {
+	case errors.Is(err, model.ErrNoChange):
+		return &model.APIError{
+			Code:      http.StatusNotFound,
+			Message:   "Mission and/or Astronaut not found",
+			Exception: err.Error(),
+		}
+	case err != nil:
 		return &model.APIError{
 			Code:      http.StatusInternalServerError,
 			Message:   "failed to remove astronaut from mission",
 			Exception: err.Error(),
 		}
+	default:
+		return nil
 	}
-	return nil
 }
 
 func DeleteMission(ctx context.Context, r model.MissionRepository, id int) error {

@@ -180,7 +180,7 @@ type (
 		FindMissionByNameOrAlias(ctx context.Context, target string) ([]*Mission, error)
 		FindAllMissions(ctx context.Context) ([]*Mission, error)
 		UpdateMission(ctx context.Context, m *Mission) error
-		CreateAstronautMission(ctx context.Context, missionID, astronautID int) error
+		CreateAstronautMission(ctx context.Context, astronautID, missionID int) error
 		FindMissionsByAstronaut(ctx context.Context, astronautID int) ([]*Mission, error)
 		DeleteAstronautMission(ctx context.Context, astronautID, missionID int) error
 		DeleteMission(ctx context.Context, missionID int) error

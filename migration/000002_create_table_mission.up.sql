@@ -1,6 +1,6 @@
 CREATE TABLE mission (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     alias VARCHAR(255),
     date_of_mission DATE NOT NULL,
     successful BOOLEAN DEFAULT TRUE NOT NULL
