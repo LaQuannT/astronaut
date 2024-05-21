@@ -105,6 +105,40 @@ func (m *Mission) Valid() (map[string]string, bool) {
 	return problems, true
 }
 
+type AstronautLog struct {
+	AstronautID      int
+	SpaceFlights     int
+	SpaceFlightHours int
+	SpaceWalks       int
+	SpaceWalkHours   int
+	Status           status
+	DeathMissionID   int
+	DeathDate        string
+}
+
+func (a *AstronautLog) Valid() (map[string]string, bool) {
+	m := make(map[string]string)
+
+	if a.AstronautID == 0 {
+		m["astronaut_id"] = "astronaut_id must not be empty"
+	}
+	if a.Status != Active || a.Status != Retired || a.Status != Management || a.Status != Deceased {
+		m["status"] = "status must be one of active, retired, management or deceased"
+	}
+
+	if a.DeathDate != "" {
+		_, err := time.Parse(time.DateOnly, a.DeathDate)
+		if err != nil {
+			m["death_date"] = "death_date must be a valid date yyyy-mm-dd"
+		}
+	}
+
+	if len(m) > 0 {
+		return m, false
+	}
+	return m, true
+}
+
 type (
 	User struct {
 		ID        int    `json:"id"`
@@ -139,17 +173,6 @@ type (
 		AlmaMaters      []*AlmaMater
 		UnderGradMajors []*Major
 		GradMajors      []*Major
-	}
-
-	AstronautLog struct {
-		AstronautID      int
-		SpaceFlights     int
-		SpaceFlightHours int
-		SpaceWalks       int
-		SpaceWalkHours   int
-		Status           status
-		DeathMissionID   int
-		DeathDate        string
 	}
 
 	AstronautRepository interface {
