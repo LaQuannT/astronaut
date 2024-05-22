@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
@@ -92,10 +93,19 @@ func (r *MilitaryLogRepository) UpdateMilitaryLog(ctx context.Context, m *model.
 
 	stmt := `UPDATE military_history SET branch=$1, rank=$2, retired=$3 WHERE astronaut_id=$4`
 
-	_, err = tx.ExecContext(ctx, stmt, m.Branch, m.Rank, m.Retired, m.AstronautID)
+	result, err := tx.ExecContext(ctx, stmt, m.Branch, m.Rank, m.Retired, m.AstronautID)
 	if err != nil {
 		return err
 	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
+	}
+
 	tx.Commit()
 
 	return nil
@@ -109,9 +119,17 @@ func (r *MilitaryLogRepository) DeleteMilitaryLog(ctx context.Context, astronaut
 	defer tx.Rollback()
 
 	stmt := `DELETE FROM military_history WHERE astronaut_id=$1`
-	_, err = tx.ExecContext(ctx, stmt, astronautID)
+	result, err := tx.ExecContext(ctx, stmt, astronautID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 

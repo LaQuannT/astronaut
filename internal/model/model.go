@@ -138,6 +138,35 @@ func (a *AstronautLog) Valid() (map[string]string, bool) {
 	return m, true
 }
 
+type MilitaryLog struct {
+	AstronautID int
+	Branch      string
+	Rank        string
+	Retired     bool
+}
+
+func (m *MilitaryLog) Valid() (map[string]string, bool) {
+	problems := make(map[string]string)
+
+	if m.AstronautID == 0 {
+		problems["astronaut_id"] = "astronaut_id must not be empty"
+	}
+
+	if m.Branch == "" {
+		problems["branch"] = "branch must not be empty"
+	}
+
+	if m.Rank == "" {
+		problems["rank"] = "rank must not be empty"
+	}
+
+	if len(problems) > 0 {
+		return problems, false
+	}
+
+	return problems, true
+}
+
 type (
 	User struct {
 		ID        int    `json:"id"`
@@ -148,13 +177,6 @@ type (
 		APIKey    string `json:"apiKey,omitempty"`
 		CreatedAt string `json:"createdAt"`
 		UpdatedAt string `json:"updatedAt"`
-	}
-
-	MilitaryLog struct {
-		AstronautID int
-		Branch      string
-		Rank        string
-		Retired     bool
 	}
 
 	Major struct {
