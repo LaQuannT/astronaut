@@ -112,7 +112,6 @@ type AstronautLog struct {
 	SpaceWalks       int
 	SpaceWalkHours   int
 	Status           status
-	DeathMissionID   int
 	DeathDate        string
 }
 
@@ -122,7 +121,7 @@ func (a *AstronautLog) Valid() (map[string]string, bool) {
 	if a.AstronautID == 0 {
 		m["astronaut_id"] = "astronaut_id must not be empty"
 	}
-	if a.Status != Active || a.Status != Retired || a.Status != Management || a.Status != Deceased {
+	if a.Status != Active && a.Status != Retired && a.Status != Management && a.Status != Deceased {
 		m["status"] = "status must be one of active, retired, management or deceased"
 	}
 

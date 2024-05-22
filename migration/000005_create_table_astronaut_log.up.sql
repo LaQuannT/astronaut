@@ -7,6 +7,5 @@ CREATE TABLE astronaut_log (
     space_walks INT DEFAULT 0,
     space_walk_hrs INT DEFAULT 0,
     status status NOT NULL,
-    death_mission INT REFERENCES mission(id),
     death_date DATE
 );

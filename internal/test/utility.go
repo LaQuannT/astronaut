@@ -52,6 +52,13 @@ func clearTables(db *sql.DB) error {
 		return err
 	}
 
+	stmt = `DELETE FROM astronaut_log;`
+
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
 	stmt = `DELETE FROM astronaut;
 	ALTER SEQUENCE astronaut_id_seq RESTART WITH 1;`
 
