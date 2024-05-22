@@ -99,10 +99,18 @@ func (r *AstronautLogRepository) UpdateAstronautLog(ctx context.Context, a *mode
 	stmt := `UPDATE astronaut_log SET space_flights=$1, space_flight_hrs=$2, space_walks=$3, space_walk_hrs=$4,
     status=$5, death_date=$6 WHERE astronaut_id=$7;`
 
-	_, err = tx.ExecContext(ctx, stmt, a.SpaceFlights, a.SpaceFlightHours, a.SpaceWalks, a.SpaceWalkHours,
+	result, err := tx.ExecContext(ctx, stmt, a.SpaceFlights, a.SpaceFlightHours, a.SpaceWalks, a.SpaceWalkHours,
 		a.Status, newNullString(a.DeathDate), a.AstronautID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 
@@ -118,9 +126,16 @@ func (r *AstronautLogRepository) DeleteAstronautLog(ctx context.Context, astrona
 
 	stmt := `DELETE FROM astronaut_log WHERE astronaut_id=$1;`
 
-	_, err = tx.ExecContext(ctx, stmt, astronautID)
+	result, err := tx.ExecContext(ctx, stmt, astronautID)
 	if err != nil {
 		return err
+	}
+	changes, err := result.RowsAffected()
+	switch {
+	case err != nil:
+		return err
+	case changes != 1:
+		return model.ErrNoChange
 	}
 	tx.Commit()
 

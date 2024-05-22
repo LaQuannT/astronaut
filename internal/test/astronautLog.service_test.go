@@ -163,3 +163,90 @@ func TestGetAstronautLogs(t *testing.T) {
 		assert.Len(t, als, 2)
 	})
 }
+
+func TestUpdateAstronautLog(t *testing.T) {
+	if err := clearTables(dbConn); err != nil {
+		t.Errorf("Error clearing tables: %v", err)
+	}
+	ctx := context.TODO()
+
+	a := &model.Astronaut{
+		FirstName:  "john",
+		LastName:   "doe",
+		Gender:     "M",
+		BirthDate:  "2022-01-01",
+		BirthPlace: "manchester,uk",
+	}
+	a, err := service.AddAstronaut(ctx, a, astroRepo)
+	if err != nil {
+		t.Errorf("Unexpected error adding Astronaut: %v", err)
+	}
+	log := &model.AstronautLog{
+		AstronautID: a.ID,
+		Status:      model.Retired,
+	}
+	log, err = service.AddAstronautLog(ctx, astroLogRepo, log)
+	if err != nil {
+		t.Errorf("Unexpected error adding AstronautLog: %v", err)
+	}
+
+	t.Run("returns error for unknown astronaut ID", func(t *testing.T) {
+		l := &model.AstronautLog{
+			AstronautID: 13,
+			Status:      model.Active,
+		}
+
+		err := service.UpdateAstronautLog(ctx, astroLogRepo, l)
+		if err == nil {
+			t.Errorf("Expected error updating astronaut log with unknown astronaut ID")
+		}
+	})
+
+	t.Run("return an error for invaid astronaut log data", func(t *testing.T) {
+		l := &model.AstronautLog{
+			AstronautID: a.ID,
+		}
+		err := service.UpdateAstronautLog(ctx, astroLogRepo, l)
+		if err == nil {
+			t.Errorf("Expected error updating astronaut log with invalid astronaut ID")
+		}
+	})
+
+	t.Run("updates an existing astronaut log", func(t *testing.T) {
+		l := &model.AstronautLog{
+			AstronautID: a.ID,
+			Status:      model.Management,
+		}
+		err := service.UpdateAstronautLog(ctx, astroLogRepo, l)
+		if err != nil {
+			t.Errorf("Unexpected error updating AstronautLog: %v", err)
+		}
+
+		l, err = service.GetAstronautLog(ctx, astroLogRepo, a.ID)
+		if err != nil {
+			t.Errorf("Unexpected error getting AstronautLog: %v", err)
+		}
+		assert.Equal(t, model.Management, l.Status)
+	})
+}
+
+func TestDeleteAstronautLog(t *testing.T) {
+	ctx := context.TODO()
+
+	t.Run("returns an error deleting log with unknown astronaut ID", func(t *testing.T) {
+		astronautID := 99
+		err := service.DeleteAstronautLog(ctx, astroLogRepo, astronautID)
+		if err == nil {
+			t.Errorf("Expected error deleting astronaut log with unknown astronaut ID")
+		}
+	})
+
+	t.Run("deletes an existing astronaut log", func(t *testing.T) {
+		astronautID := 1
+
+		err := service.DeleteAstronautLog(ctx, astroLogRepo, astronautID)
+		if err != nil {
+			t.Errorf("Unexpected error deleting AstronautLog: %v", err)
+		}
+	})
+}

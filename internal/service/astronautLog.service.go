@@ -78,14 +78,22 @@ func UpdateAstronautLog(ctx context.Context, astroLogRepo model.AstronautLogRepo
 	defer cancel()
 
 	err := astroLogRepo.UpdateAstronautLog(ctx, al)
-	if err != nil {
+	switch {
+	case errors.Is(err, model.ErrNoChange):
+		return &model.APIError{
+			Code:      http.StatusNotFound,
+			Message:   "AstronautLog not found",
+			Exception: err.Error(),
+		}
+	case err != nil:
 		return &model.APIError{
 			Code:      http.StatusInternalServerError,
 			Message:   "failed to update AstronautLog",
 			Exception: err.Error(),
 		}
+	default:
+		return nil
 	}
-	return nil
 }
 
 func DeleteAstronautLog(ctx context.Context, astroLogRepo model.AstronautLogRepository, id int) error {
