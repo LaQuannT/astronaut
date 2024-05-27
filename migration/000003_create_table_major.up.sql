@@ -1,4 +1,4 @@
 CREATE TABLE major (
     id SERIAL PRIMARY KEY,
-    course VARCHAR(255) NOT NULL
+    course VARCHAR(255) UNIQUE NOT NULL
 );

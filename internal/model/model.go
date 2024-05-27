@@ -75,7 +75,7 @@ func (a *Astronaut) Valid() (map[string]string, bool) {
 	if len(m) > 0 {
 		return m, false
 	}
-	return m, true
+	return nil, true
 }
 
 type Mission struct {
@@ -102,7 +102,7 @@ func (m *Mission) Valid() (map[string]string, bool) {
 	if len(problems) > 0 {
 		return problems, false
 	}
-	return problems, true
+	return nil, true
 }
 
 type AstronautLog struct {
@@ -135,7 +135,7 @@ func (a *AstronautLog) Valid() (map[string]string, bool) {
 	if len(m) > 0 {
 		return m, false
 	}
-	return m, true
+	return nil, true
 }
 
 type MilitaryLog struct {
@@ -164,7 +164,39 @@ func (m *MilitaryLog) Valid() (map[string]string, bool) {
 		return problems, false
 	}
 
-	return problems, true
+	return nil, true
+}
+
+type Major struct {
+	ID     int
+	Course string
+}
+
+func (m *Major) Valid() (map[string]string, bool) {
+	problems := make(map[string]string)
+	if m.Course == "" {
+		problems["course"] = "course must not be empty"
+	}
+	if m.ID >= 0 {
+		return problems, false
+	}
+	return nil, true
+}
+
+type AlmaMater struct {
+	ID     int
+	School string
+}
+
+func (m *AlmaMater) Valid() (map[string]string, bool) {
+	problems := make(map[string]string)
+	if m.School == "" {
+		problems["school"] = "school must not be empty"
+	}
+	if m.ID >= 0 {
+		return problems, false
+	}
+	return nil, true
 }
 
 type (
@@ -177,16 +209,6 @@ type (
 		APIKey    string `json:"apiKey,omitempty"`
 		CreatedAt string `json:"createdAt"`
 		UpdatedAt string `json:"updatedAt"`
-	}
-
-	Major struct {
-		ID     int
-		Course string
-	}
-
-	AlmaMater struct {
-		ID     int
-		School string
 	}
 
 	AcademicLog struct {
