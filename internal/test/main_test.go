@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/LaQuannT/astronaut-api/internal/database/postgres"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -21,6 +22,11 @@ var (
 
 func TestMain(m *testing.M) {
 	var err error
+	err = godotenv.Load("../../.env")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading .env file: %v", err)
+		os.Exit(1)
+	}
 
 	connStr := os.Getenv("TEST_DB_URL")
 	dbConn, err = postgres.Connect(connStr)

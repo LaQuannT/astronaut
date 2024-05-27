@@ -44,7 +44,7 @@ func (r *MilitaryLogRepository) FindMilitaryLog(ctx context.Context, astronautID
 
 	m := new(model.MilitaryLog)
 
-	stmt := `SELECT FROM military_history WHERE astronaut_id = $1;`
+	stmt := `SELECT * FROM military_history WHERE astronaut_id = $1;`
 
 	err = tx.QueryRowContext(ctx, stmt, astronautID).Scan(&m.AstronautID, &m.Branch, &m.Rank, &m.Retired)
 	if err != nil {

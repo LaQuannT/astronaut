@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -21,7 +22,7 @@ func migration(filepath, connStr, direction string) error {
 	switch direction {
 	case "up":
 		err = m.Up()
-		if err != nil && err != migrate.ErrNoChange {
+		if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 			return err
 		}
 	case "down":
@@ -45,7 +46,13 @@ func clearTables(db *sql.DB) error {
 	}
 	defer tx.Rollback()
 
-	stmt := `DELETE FROM astronaut_mission;`
+	stmt := `DELETE FROM military_history;`
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = `DELETE FROM astronaut_mission;`
 
 	_, err = tx.ExecContext(ctx, stmt)
 	if err != nil {
