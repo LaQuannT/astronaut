@@ -155,7 +155,7 @@ func (r *UserRepository) GenerateNewUserAPIKey(ctx context.Context, id int) (str
 
 	var key string
 
-	stmt := `UPDATE api_key SET key=uuid_generate_v4() WHERE user_id = $2 RETURNING key;`
+	stmt := `UPDATE api_key SET key=uuid_generate_v4() WHERE user_id = $1 RETURNING key;`
 	err = tx.QueryRowContext(ctx, stmt, id).Scan(&key)
 	if err != nil {
 		return "", err

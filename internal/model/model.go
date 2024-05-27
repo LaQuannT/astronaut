@@ -199,18 +199,44 @@ func (m *AlmaMater) Valid() (map[string]string, bool) {
 	return nil, true
 }
 
-type (
-	User struct {
-		ID        int    `json:"id"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Email     string `json:"email"`
-		Password  string `json:"password,omitempty"`
-		APIKey    string `json:"apiKey,omitempty"`
-		CreatedAt string `json:"createdAt"`
-		UpdatedAt string `json:"updatedAt"`
+type User struct {
+	ID        int    `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+	Password  string `json:"password,omitempty"`
+	APIKey    string `json:"apiKey,omitempty"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+func (u *User) Valid() (map[string]string, bool) {
+	problems := make(map[string]string)
+	if u.FirstName == "" {
+		problems["firstName"] = "firstName must not be empty"
+	}
+	if u.LastName == "" {
+		problems["lastName"] = "lastName must not be empty"
+	}
+	if u.Email == "" || !emailRegex.MatchString(u.Email) {
+		problems["email"] = "email must be a valid email"
 	}
 
+	if u.Password == "" {
+		problems["password"] = errInvalidPassword.Error()
+	} else {
+		err := ValidatePassword(u.Password)
+		if err != nil {
+			problems["password"] = err.Error()
+		}
+	}
+	if len(problems) > 0 {
+		return problems, false
+	}
+	return nil, true
+}
+
+type (
 	AcademicLog struct {
 		AstronautID     int
 		AlmaMaters      []*AlmaMater
