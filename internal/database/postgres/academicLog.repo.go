@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
@@ -111,9 +112,17 @@ func (r *AcademicLogRepository) UpdateMajor(ctx context.Context, m *model.Major)
 
 	stmt := `UPDATE major SET course=$1  WHERE id=$2;`
 
-	_, err = tx.ExecContext(ctx, stmt, m.Course, m.ID)
+	result, err := tx.ExecContext(ctx, stmt, m.Course, m.ID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 	tx.Commit()
 
@@ -128,9 +137,17 @@ func (r *AcademicLogRepository) UpdateAlmaMater(ctx context.Context, a *model.Al
 	defer tx.Rollback()
 
 	stmt := `UPDATE alma_mater SET school=$1 WHERE id=$2;`
-	_, err = tx.ExecContext(ctx, stmt, a.School, a.ID)
+	result, err := tx.ExecContext(ctx, stmt, a.School, a.ID)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 	tx.Commit()
 
@@ -279,9 +296,18 @@ func (r *AcademicLogRepository) DeleteMajor(ctx context.Context, id int) error {
 
 	stmt := `DELETE FROM major WHERE id=$1;`
 
-	_, err = tx.ExecContext(ctx, stmt, id)
+	result, err := tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 
 	stmt = `DELETE FROM astronaut_undergrad_major WHERE major_id=$1;`
@@ -345,9 +371,18 @@ func (r *AcademicLogRepository) DeleteAlmaMater(ctx context.Context, id int) err
 	defer tx.Rollback()
 
 	stmt := `DELETE FROM alma_mater WHERE id=$1;`
-	_, err = tx.ExecContext(ctx, stmt, id)
+	result, err := tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 
 	stmt = `DELETE FROM astronaut_alma_mater WHERE id=$1;`
@@ -394,6 +429,8 @@ func (r *AcademicLogRepository) GetAcademicLog(ctx context.Context, astronautID 
 	}
 
 	log.UnderGradMajors, err = r.FindAstronautUnderGradMajors(ctx, astronautID)
-
+	if err != nil {
+		return nil, err
+	}
 	return log, nil
 }
