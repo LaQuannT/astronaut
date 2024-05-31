@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+
 	"github.com/LaQuannT/astronaut-api/internal/model"
 )
 
@@ -92,7 +93,7 @@ func (r *UserRepository) FindAllUsers(ctx context.Context) ([]*model.User, error
 
 	var users []*model.User
 
-	stmt := `SELECT id, first_name, last_name, email, created_at, updated_at FROM "users";`
+	stmt := `SELECT id, first_name, last_name, email, created_at, updated_at FROM "user";`
 	rows, err := tx.QueryContext(ctx, stmt)
 	if err != nil {
 		return nil, err
@@ -138,9 +139,18 @@ func (r *UserRepository) RestUserPassword(ctx context.Context, hash string, id i
 
 	stmt := `UPDATE "user" SET password=$1 WHERE id = $2;`
 
-	_, err = tx.ExecContext(ctx, stmt, hash, id)
+	result, err := tx.ExecContext(ctx, stmt, hash, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 	tx.Commit()
 	return nil
@@ -171,16 +181,25 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id int) error {
 	}
 	defer tx.Rollback()
 
-	stmt := `DELETE FROM "user" WHERE id = $1;`
+	stmt := `DELETE FROM api_key WHERE user_id = $1;`
 	_, err = tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
 
-	stmt = `DELETE FROM api_key WHERE user_id = $1;`
-	_, err = tx.ExecContext(ctx, stmt, id)
+	stmt = `DELETE FROM "user" WHERE id = $1;`
+	result, err := tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 
 	stmt = `DELETE FROM admin WHERE EXISTS(SELECT * FROM admin WHERE id = $1);`
@@ -219,11 +238,62 @@ func (r *UserRepository) RevokeAdminPrivileges(ctx context.Context, id int) erro
 	defer tx.Rollback()
 
 	stmt := `DELETE FROM admin WHERE user_id = $1;`
-	_, err = tx.ExecContext(ctx, stmt, id)
+	result, err := tx.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
+	}
+
+	changes, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if changes != 1 {
+		return model.ErrNoChange
 	}
 	tx.Commit()
 
 	return nil
+}
+
+func (r *UserRepository) FindUserByAPIKey(ctx context.Context, key string) (*model.User, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	stmt := `SELECT  u.id, u.first_name, u.last_name, u.email, u.password, a.key, u.created_at, u.updated_at  FROM api_key AS a 
+    INNER JOIN "user" AS u ON u.id = a.user_id
+    WHERE a.key = $1;`
+
+	u := new(model.User)
+
+	err = tx.QueryRowContext(ctx, stmt, key).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Password, &u.APIKey, &u.CreatedAt, &u.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	tx.Commit()
+
+	return u, nil
+}
+
+func (r *UserRepository) IsAdmin(ctx context.Context, userID int) (int, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	stmt := `SELECT COUNT(DISTINCT user_id) FROM admin WHERE user_id=$1;`
+
+	var userCount int
+
+	err = tx.QueryRowContext(ctx, stmt, userID).Scan(&userCount)
+	if err != nil {
+		return 0, err
+	}
+	tx.Commit()
+
+	return userCount, nil
 }

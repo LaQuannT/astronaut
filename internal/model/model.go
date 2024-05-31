@@ -264,6 +264,8 @@ type (
 		GenerateNewUserAPIKey(ctx context.Context, id int) (string, error)
 		GiveAdminPrivileges(ctx context.Context, id int) error
 		RevokeAdminPrivileges(ctx context.Context, id int) error
+		FindUserByAPIKey(ctx context.Context, key string) (*User, error)
+		IsAdmin(ctx context.Context, userID int) (int, error)
 	}
 
 	MissionRepository interface {

@@ -5,15 +5,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"time"
 )
 
 func migration(filepath, connStr, direction string) error {
 	m, err := migrate.New(
-		"file://../../migration",
+		filepath,
 		connStr)
 	if err != nil {
 		return err
@@ -76,6 +77,23 @@ func clearTables(db *sql.DB) error {
 
 	stmt = `DELETE FROM mission;
 	ALTER SEQUENCE 	mission_id_seq RESTART WITH 1;`
+
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = `DELETE FROM admin;
+  ALTER SEQUENCE admin_id_seq RESTART WITH 1;`
+
+	_, err = tx.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = `DELETE FROM "api_key";
+  DELETE FROM "user";
+  ALTER SEQUENCE user_id_seq RESTART WITH 1;`
 
 	_, err = tx.ExecContext(ctx, stmt)
 	if err != nil {

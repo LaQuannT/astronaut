@@ -4,23 +4,32 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/LaQuannT/astronaut-api/internal/model"
-	"github.com/lib/pq"
 	"net/http"
 	"time"
+
+	"github.com/LaQuannT/astronaut-api/internal/model"
+	"github.com/lib/pq"
 )
 
 func RegisterUser(ctx context.Context, repository model.UserRepository, user *model.User) (*model.User, error) {
-	if err := validate(user, "User"); err != nil {
+	err := validate(user, "User")
+	if err != nil {
 		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	// convert password to a hash
+	user.Password, err = generatePasswordHash(user.Password)
+	if err != nil {
+		return nil, &model.APIError{
+			Code:      http.StatusInternalServerError,
+			Message:   "failed to register user",
+			Exception: err.Error(),
+		}
+	}
 
-	err := repository.CreateUser(ctx, user)
+	err = repository.CreateUser(ctx, user)
 	if err != nil {
 		var pgErr *pq.Error
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -172,18 +181,33 @@ func ResetPassword(ctx context.Context, repository model.UserRepository, passwor
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	// convert password to a hash
-	var hash string
-
-	err := repository.RestUserPassword(ctx, hash, userID)
+	hash, err := generatePasswordHash(password)
 	if err != nil {
+		return &model.APIError{
+			Code:      http.StatusInternalServerError,
+			Message:   "failed to reset user password",
+			Exception: err.Error(),
+		}
+	}
+
+	err = repository.RestUserPassword(ctx, hash, userID)
+	switch {
+	case errors.Is(err, model.ErrNoChange):
+		return &model.APIError{
+			Code:      http.StatusNotFound,
+			Message:   "User not found",
+			Exception: err.Error(),
+		}
+
+	case err != nil:
 		return &model.APIError{
 			Code:      http.StatusInternalServerError,
 			Message:   "failed to reset password",
 			Exception: err.Error(),
 		}
+	default:
+		return nil
 	}
-	return nil
 }
 
 func GenerateNewAPIKey(ctx context.Context, repository model.UserRepository, userID int) (string, error) {
@@ -234,4 +258,50 @@ func RemoveAdmin(ctx context.Context, repository model.UserRepository, userID in
 		}
 	}
 	return nil
+}
+
+func SearchAPIKey(ctx context.Context, repository model.UserRepository, key string) (*model.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	usr, err := repository.FindUserByAPIKey(ctx, key)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return nil, &model.APIError{
+			Code:      http.StatusNotFound,
+			Message:   "User not found",
+			Exception: err.Error(),
+		}
+	case err != nil:
+		return nil, &model.APIError{
+			Code:      http.StatusInternalServerError,
+			Message:   "failed to get user",
+			Exception: err.Error(),
+		}
+	default:
+		return usr, nil
+	}
+}
+
+func CheckAdminPermission(ctx context.Context, repository model.UserRepository, userID int) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	usrCount, err := repository.IsAdmin(ctx, userID)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, &model.APIError{
+			Code:      http.StatusInternalServerError,
+			Message:   "failed to check user permission",
+			Exception: err.Error(),
+		}
+	}
+
+	if usrCount != 1 {
+		return false, nil
+	}
+
+	return true, nil
 }

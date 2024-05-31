@@ -38,7 +38,7 @@ func TestMain(m *testing.M) {
 	astroRepo, astroLogRepo, academicRepo, militaryRepo, missionRepo, userRepo = postgres.InitializeRepositories(dbConn)
 
 	// ensures tables are built
-	err = migration("migration", connStr, "up")
+	err = migration("file://../../migration", connStr, "up")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error running up migration: %v\n", err)
 		os.Exit(1)
