@@ -13,6 +13,7 @@ func NewServer(logger *slog.Logger, usrRepository model.UserRepository) http.Han
 	addRoutes(mux, usrRepository)
 
 	var handler http.Handler = mux
+	handler = middlewares.EnableCors(handler)
 	mw := middlewares.RequestLogger(logger)
 	handler = mw(handler)
 	return handler

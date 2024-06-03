@@ -14,7 +14,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
-func writeError(w http.ResponseWriter, err error) {
+func WriteError(w http.ResponseWriter, err error) {
 	var apiErr *model.APIError
 
 	e := struct{ Error string }{Error: ""}

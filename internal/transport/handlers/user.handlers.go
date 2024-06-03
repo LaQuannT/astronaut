@@ -18,13 +18,13 @@ func HandleRegisterUser(repository model.UserRepository) http.HandlerFunc {
 		usr := new(model.User)
 
 		if err := json.NewDecoder(r.Body).Decode(usr); err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		usr, err := service.RegisterUser(r.Context(), repository, usr)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
@@ -36,7 +36,7 @@ func HandleGetUser(repository model.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params, err := url.ParseQuery(r.URL.RawQuery)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 		}
 
 		email := params.Get("email")
@@ -48,7 +48,7 @@ func HandleGetUser(repository model.UserRepository) http.HandlerFunc {
 		case email != "":
 			usr, err = service.SearchUserEmail(r.Context(), repository, email)
 			if err != nil {
-				writeError(w, err)
+				WriteError(w, err)
 				return
 			}
 			writeJSON(w, http.StatusOK, usr)
@@ -57,18 +57,18 @@ func HandleGetUser(repository model.UserRepository) http.HandlerFunc {
 		case userID != "":
 			uid, err := strconv.Atoi(userID)
 			if err != nil {
-				writeError(w, err)
+				WriteError(w, err)
 				return
 			}
 			usr, err = service.SearchUserID(r.Context(), repository, uid)
 			if err != nil {
-				writeError(w, err)
+				WriteError(w, err)
 				return
 			}
 			writeJSON(w, http.StatusOK, usr)
 			return
 		default:
-			writeError(w, &model.APIError{
+			WriteError(w, &model.APIError{
 				Code:      http.StatusBadRequest,
 				Message:   "email or uid param not supplied",
 				Exception: "email or user ID params not supplied",
@@ -83,7 +83,7 @@ func HandleGetUsers(repository model.UserRepository) http.HandlerFunc {
 
 		urs, err := service.GetUsers(r.Context(), repository)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
@@ -97,20 +97,20 @@ func HandleUpdateUser(repository model.UserRepository) http.HandlerFunc {
 
 		id, err := strconv.Atoi(uid)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		usr, err := service.SearchUserID(r.Context(), repository, id)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		err = json.NewDecoder(r.Body).Decode(usr)
 		switch {
 		case errors.Is(err, io.EOF):
-			writeError(w, &model.APIError{
+			WriteError(w, &model.APIError{
 				Code:      http.StatusBadRequest,
 				Message:   "user data not provided in request body",
 				Exception: err.Error(),
@@ -118,13 +118,13 @@ func HandleUpdateUser(repository model.UserRepository) http.HandlerFunc {
 			return
 
 		case err != nil:
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		err = service.UpdateUser(r.Context(), repository, usr)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
@@ -138,12 +138,12 @@ func HandleDeleteUser(repository model.UserRepository) http.HandlerFunc {
 
 		id, err := strconv.Atoi(uid)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		if err := service.DeleteUser(r.Context(), repository, id); err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
@@ -157,20 +157,20 @@ func HandlePasswordReset(repository model.UserRepository) http.HandlerFunc {
 
 		id, err := strconv.Atoi(uid)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		usr := new(model.User)
 
 		if err := json.NewDecoder(r.Body).Decode(usr); err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		err = service.ResetPassword(r.Context(), repository, usr.Password, id)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
@@ -184,13 +184,13 @@ func HandleAPIKeyReset(repository model.UserRepository) http.HandlerFunc {
 
 		id, err := strconv.Atoi(uid)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
 		key, err := service.GenerateNewAPIKey(r.Context(), repository, id)
 		if err != nil {
-			writeError(w, err)
+			WriteError(w, err)
 			return
 		}
 
