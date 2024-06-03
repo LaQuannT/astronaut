@@ -3,8 +3,10 @@ package app
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/LaQuannT/astronaut-api/internal/config"
 	"github.com/LaQuannT/astronaut-api/internal/database/postgres"
@@ -22,7 +24,9 @@ func initialize(c *config.Config) http.Handler {
 
 	_, _, _, _, _, usrRepository := postgres.InitializeRepositories(dbConn)
 
-	handler := transport.NewServer(usrRepository)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	handler := transport.NewServer(logger, usrRepository)
 	return handler
 }
 
