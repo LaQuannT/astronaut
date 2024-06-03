@@ -1,10 +1,14 @@
 package transport
 
-import "net/http"
+import (
+	"net/http"
 
-func NewServer() http.Handler {
+	"github.com/LaQuannT/astronaut-api/internal/model"
+)
+
+func NewServer(usrRepository model.UserRepository) http.Handler {
 	mux := http.NewServeMux()
-	// add routes
+	addRoutes(mux, usrRepository)
 
 	var handler http.Handler = mux
 	// add top level middleware CORS, auth, and logging
