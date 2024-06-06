@@ -8,9 +8,18 @@ import (
 	"github.com/LaQuannT/astronaut-api/internal/transport/middlewares"
 )
 
-func NewServer(logger *slog.Logger, usrRepository model.UserRepository) http.Handler {
+func NewServer(
+	logger *slog.Logger,
+	usrRepository model.UserRepository,
+	astronautRepository model.AstronautRepository,
+) http.Handler {
 	mux := http.NewServeMux()
-	addRoutes(mux, usrRepository)
+
+	addRoutes(
+		mux,
+		usrRepository,
+		astronautRepository,
+	)
 
 	var handler http.Handler = mux
 	handler = middlewares.EnableCors(handler)

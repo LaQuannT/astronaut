@@ -22,11 +22,15 @@ func initialize(c *config.Config) http.Handler {
 		log.Fatal(err)
 	}
 
-	_, _, _, _, _, usrRepository := postgres.InitializeRepositories(dbConn)
+	astronautRepository, _, _, _, _, usrRepository := postgres.InitializeRepositories(dbConn)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	handler := transport.NewServer(logger, usrRepository)
+	handler := transport.NewServer(
+		logger,
+		usrRepository,
+		astronautRepository,
+	)
 	return handler
 }
 
