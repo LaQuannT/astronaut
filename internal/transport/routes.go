@@ -28,4 +28,6 @@ func addRoutes(
 	mux.Handle("GET /api/v1/astonauts/{astronautID}", handlers.HandleGetAstronaut(astronautRepository))
 	mux.Handle("PUT /api/v1/astronauts/{astronautID}", handlers.HandleUpdateAstronaut(astronautRepository))
 	mux.Handle("DELETE /api/v1/astronauts/{astronautID}", handlers.HandleDeleteAstronaut(astronautRepository))
+
+	// mission routes
 }
